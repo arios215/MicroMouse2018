@@ -1,3 +1,10 @@
+/*
+ * Motor Control
+ * 
+ * Current abilities:
+ *  Turning Functions
+ */
+
 #include <elapsedMillis.h>
 
 
