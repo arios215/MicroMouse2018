@@ -8,11 +8,18 @@
 #include <elapsedMillis.h>
 
 
-#define LIn1 A1      //Left Input 1
-#define LIn2 A2      //Left Input 2
-#define LEnable 5  //Left Enable
+#define LIn1 A1     //Left Input 1 On Motor Driver (Left Side)
+#define LIn2 A2     //Left Input 2 On MOtor Driver (Left Side)
+#define LEnable 5   //Left Enable
 #define LEA 2       //Left Encoder A
 #define LEB A0      //Left Encoder B
+
+#define RIn1 A3     //Right Input 1 On Motor Driver (Right Side)
+#define RIn2 A4     //Right Input 2 On Motor Driver (Right Side)
+#define REnable 6   //Right Enable
+#define REA 3       //Right Encoder A
+#define REB A5      //Right Encoder B
+
 
 volatile int LEV;   //Left Encoder Value
 bool LExit_Value;
@@ -40,12 +47,16 @@ void setup() {
   //Left Enable
   digitalWrite(LEnable, HIGH);
 
-  LSPD(50);
-  LET(-90);
-  LET(90);
-  LSPD(200);
-  LET(1000);
-  LET(-1000);
+//  LSPD(55);
+//  LET(-90);
+//  LET(90);
+//  LSPD(200);
+//  LET(1000);
+//  LET(-1000);
+
+LCW();
+RCW();
+
 }
 
 void loop() {
@@ -151,21 +162,19 @@ void LSTP()              //Left Stop
   digitalWrite(LIn2, LOW);
 }
 
-////Right Functions
-//void RCW()              //Right Clock Wise
-//{
-//  digitalWrite(D3, HIGH);
-//  digitalWrite(D4, LOW);
-//}
-//void RCCW()             //Right Counter Clock Wise
-//{
-//  digitalWrite(D3, LOW);
-//  digitalWrite(D4, HIGH);
-//}
-//void RSTP()             //Right Stop
-//{
-//  digitalWrite(D3, LOW);
-//  digitalWrite(D4, LOW);
-//}
-
-
+//Right Functions
+void RCW()              //Right Clock Wise
+{
+  digitalWrite(RIn2, HIGH);
+  digitalWrite(RIn1, LOW);
+}
+void RCCW()             //Right Counter Clock Wise
+{
+  digitalWrite(RIn2, LOW);
+  digitalWrite(RIn1, HIGH);
+}
+void RSTP()             //Right Stop
+{
+  digitalWrite(RIn2, LOW);
+  digitalWrite(RIn1, LOW);
+}
