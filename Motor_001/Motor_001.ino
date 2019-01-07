@@ -14,8 +14,8 @@
 #define LEA 2       //Left Encoder A
 #define LEB A0      //Left Encoder B
 
-#define RIn1 A3     //Right Input 1 On Motor Driver (Right Side)
-#define RIn2 A4     //Right Input 2 On Motor Driver (Right Side)
+#define RIn1 A3     //Right Input 3 On Motor Driver (Right Side)
+#define RIn2 A4     //Right Input 4 On Motor Driver (Right Side)
 #define REnable 6   //Right Enable
 #define REA 3       //Right Encoder A
 #define REB A5      //Right Encoder B
@@ -25,6 +25,10 @@ volatile int LEV;   //Left Encoder Value
 bool LExit_Value;
 elapsedMillis LExit_Time;
 
+volatile int REV;   //Right Encoder Value
+bool RExit_Value;
+elapsedMillis RExit_Time;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600); //Initialize baud rate to 9600
@@ -33,30 +37,39 @@ void setup() {
   pinMode(LIn1, OUTPUT);
   pinMode(LIn2, OUTPUT);
   pinMode(LEnable, OUTPUT);
+  pinMode(RIn1, OUTPUT);
+  pinMode(RIn2, OUTPUT);
+  pinMode(REnable, OUTPUT);
 
   //Output Pins
   pinMode(LEA, INPUT);
   pinMode(LEB, INPUT);
+  pinMode(REA, INPUT);
+  pinMode(REB, INPUT);
 
   //Encoder
   attachInterrupt(digitalPinToInterrupt(LEA), LIF, RISING); //Inturupt
+  attachInterrupt(digitalPinToInterrupt(REA), RIF, RISING); //Inturupt
   LEV = 0;
   LExit_Value = 0;
   LExit_Time = 0;
+  REV = 0;
+  RExit_Value = 0;
+  RExit_Time = 0;
 
-  //Left Enable
-  digitalWrite(LEnable, HIGH);
 
-//  LSPD(55);
-//  LET(-90);
-//  LET(90);
-//  LSPD(200);
-//  LET(1000);
-//  LET(-1000);
-
-LCW();
-RCW();
-
+  RSPD(55);
+  LSPD(55);  
+  RET(-90);
+  LET(-90);
+  RET(90);
+  LET(90);
+  RSPD(200);
+  LSPD(200);
+  RET(1000);
+  LET(1000);
+  RET(-1000);
+  LET(-1000);
 }
 
 void loop() {
@@ -116,6 +129,58 @@ void LIF()  //Left Inturrupt Function
     LEV--;
 }
 
+void RSPD(int R_Enable_Value) //Right Speed, Enter Speed Between 50-255
+{
+ analogWrite(REnable, R_Enable_Value);
+}
+
+void RET(int Turn_Amount)  //Right Encoder Test
+                           //Turns a certain amount, corrects it self, and waits for a certain amount of time and exits
+{
+  while (1)
+  {
+    if (REV < Turn_Amount)
+    {
+      RCW();
+      RExit_Value = 0;
+      RExit_Time = 0;
+    }
+    else if (REV > Turn_Amount)
+    {
+      RCCW();
+      RExit_Value = 0;
+      RExit_Time = 0;
+    }
+    else if (REV == Turn_Amount)
+    {
+      RSTP();
+      if (RExit_Value = 0)
+      {
+        RExit_Time = 0;
+        RExit_Value = 1;
+      }
+      else
+      {
+        if (RExit_Time < 500)
+          continue;
+        else
+        {
+          REV = 0;
+          return;
+        }
+      }
+    }
+  }
+}
+
+void RIF()  //Right Inturrupt Function
+{
+  if (digitalRead(REB) == LOW)
+    REV++;
+  else
+    REV--;
+}
+
 ////Turning Fucntions
 //void LT() //Left Turn
 //{
@@ -165,16 +230,16 @@ void LSTP()              //Left Stop
 //Right Functions
 void RCW()              //Right Clock Wise
 {
-  digitalWrite(RIn2, HIGH);
-  digitalWrite(RIn1, LOW);
+  digitalWrite(RIn1, HIGH);
+  digitalWrite(RIn2, LOW);
 }
 void RCCW()             //Right Counter Clock Wise
 {
-  digitalWrite(RIn2, LOW);
-  digitalWrite(RIn1, HIGH);
+  digitalWrite(RIn1, LOW);
+  digitalWrite(RIn2, HIGH);
 }
 void RSTP()             //Right Stop
 {
-  digitalWrite(RIn2, LOW);
   digitalWrite(RIn1, LOW);
+  digitalWrite(RIn2, LOW);
 }
