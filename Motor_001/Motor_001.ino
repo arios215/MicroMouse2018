@@ -2,12 +2,14 @@
  * Motor Control
  * 
  * Current abilities:
- *  Turning Functions
+ *  Speed
+ *  Independent Wheel Turning
+ *  Number of rotations
  */
 
 #include <elapsedMillis.h>
 
-
+//Pin Definitions
 #define LIn1 A1     //Left Input 1 On Motor Driver (Left Side)
 #define LIn2 A2     //Left Input 2 On MOtor Driver (Left Side)
 #define LEnable 5   //Left Enable
@@ -20,11 +22,12 @@
 #define REA 3       //Right Encoder A
 #define REB A5      //Right Encoder B
 
-
+//Left Encoder
 volatile int LEV;   //Left Encoder Value
 bool LExit_Value;
 elapsedMillis LExit_Time;
 
+//Right Encoder
 volatile int REV;   //Right Encoder Value
 bool RExit_Value;
 elapsedMillis RExit_Time;
@@ -60,16 +63,18 @@ void setup() {
 
   RSPD(55);
   LSPD(55);  
-  RET(-90);
-  LET(-90);
-  RET(90);
-  LET(90);
-  RSPD(200);
-  LSPD(200);
-  RET(1000);
-  LET(1000);
-  RET(-1000);
-  LET(-1000);
+//  RET(-90);
+//  LET(-90);
+//  RET(90);
+//  LET(90);
+//  RSPD(200);
+//  LSPD(200);
+//  RET(1000);
+//  LET(1000);
+//  RET(-1000);
+//  LET(-1000);
+FW(90);
+
 }
 
 void loop() {
@@ -77,14 +82,94 @@ void loop() {
 
 }
 
+//Direction Functions
+void FW( int RTurn_Amount)
+{
+  int LTurn_Amount = -1 * RTurn_Amount;
+  while(1)
+  {
+    //Left
+    if (LEV < LTurn_Amount)
+    {
+      LCW();
+      LExit_Value = 0;
+      LExit_Time = 0;
+    }
+    else if (LEV > LTurn_Amount)
+    {
+      LCCW();
+      LExit_Value = 0;
+      LExit_Time = 0;
+    }
+    else if (LEV == LTurn_Amount)
+    {
+      LSTP();
+      if (LExit_Value = 0)
+      {
+        LExit_Time = 0;
+        LExit_Value = 1;
+      }
+      else
+      {
+        if (LExit_Time < 500)
+          continue;
+        else
+        {
+          LEV = 0;
+          return;
+        }
+      }
+    }
+
+    //Right
+    if (REV < RTurn_Amount)
+    {
+      RCW();
+      RExit_Value = 0;
+      RExit_Time = 0;
+    }
+    else if (REV > RTurn_Amount)
+    {
+      RCCW();
+      RExit_Value = 0;
+      RExit_Time = 0;
+    }
+    else if (REV == RTurn_Amount)
+    {
+      RSTP();
+      if (RExit_Value = 0)
+      {
+        RExit_Time = 0;
+        RExit_Value = 1;
+      }
+      else
+      {
+        if (RExit_Time < 500)
+          continue;
+        else
+        {
+          REV = 0;
+          return;
+        }
+      }
+    }
+  }
+  
+}
+
 void LSPD(int L_Enable_Value) //Left Speed, Enter Speed Between 50-255
 {
  analogWrite(LEnable, L_Enable_Value);
 }
 
-void LET(int Turn_Amount)  //Left Encoder Test
-                           //Turns a certain amount, corrects it self, and waits for a certain amount of time and exits
+void LET(int Turn_Amount)
+/*Left Encoder Test
+  Turns a certain amount, corrects it self, and waits for a certain amount of time and exits.
+  Exit values will be 1 if LEV stays equaled to the Turn_Amount for the time set
+  otherwise if it is not, LExit_Value will turn to a 0.
+*/
 {
+  Turn_Amount = -1 * Turn_Amount;   //Making the turn amount negative for inverse wheel turning
   while (1)
   {
     if (LEV < Turn_Amount)
@@ -120,6 +205,8 @@ void LET(int Turn_Amount)  //Left Encoder Test
     }
   }
 }
+
+
 
 void LIF()  //Left Inturrupt Function
 {
