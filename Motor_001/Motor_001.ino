@@ -1,6 +1,5 @@
 /*
  * Motor Control
- * fdjsaklfjdsakl;fjdakl;s
  * 
  * Current abilities:
  *  Speed
@@ -21,7 +20,7 @@
 #define RIn2 A4     //Right Input 4 On Motor Driver (Right Side)
 #define REnable 6   //Right Enable
 #define REA 3       //Right Encoder A
-#define REB A5      //Right Encoder B jfkldassjfkl;;adsf
+#define REB A5      //Right Encoder B
 
 //Left Encoder
 volatile int LEV;   //Left Encoder Value
